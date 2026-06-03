@@ -15,6 +15,7 @@ const SALARY_BANDS = {
   3: { inr: '₹14L – ₹26L',  usd: '$65K – $110K', level: 'Embedded Developer II',  desc: 'Protocols, Linux toolchain, systems programming' },
   4: { inr: '₹20L – ₹38L',  usd: '$85K – $145K', level: 'Senior Embedded Engineer',desc: 'RTOS, DMA, production firmware patterns' },
   5: { inr: '₹32L – ₹65L',  usd: '$120K – $220K',level: 'Principal / Staff Engineer','desc': 'HAL architecture, PCB, sensor fusion, full-stack embedded' },
+  6: { inr: '₹45L – ₹95L',  usd: '$160K – $310K',level: 'IoT Gateway Architect',   desc: 'Yocto custom OS, multi-slave SPI protocols, C++ MQTT, systemd recovery' },
 };
 
 /* ══════════════════════════════════════
@@ -29,6 +30,9 @@ const COMPANY_TARGETS = [
   { name: 'Tesla',      role: 'Firmware Eng',        tier: 't1', requiresPhase: 4 },
   { name: 'Continental','role': 'AUTOSAR Dev',       tier: 't3', requiresPhase: 3 },
   { name: 'SpaceX',     role: 'Avionics Eng',        tier: 't1', requiresPhase: 5 },
+  { name: 'Siemens',    role: 'Gateway Engineer',    tier: 't2', requiresPhase: 6 },
+  { name: 'Intel',      role: 'IoT Systems Architect',tier: 't1', requiresPhase: 6 },
+  { name: 'ABB',        role: 'Industrial IoT Dev',   tier: 't2', requiresPhase: 6 },
 ];
 
 /* ══════════════════════════════════════
@@ -47,6 +51,10 @@ const READINESS_CHECKLIST = [
   { id: 'rc-rtos',      label: 'Explain preemptive scheduling + context switch', requiresLesson: 'P4-L1' },
   { id: 'rc-mutex',     label: 'Describe priority inversion + fix',        requiresLesson: 'P4-L4' },
   { id: 'rc-hal',       label: 'Design a portable HAL interface',          requiresLesson: 'P5-L1' },
+  { id: 'rc-yocto',     label: 'Configure Yocto layers and build custom Linux', requiresLesson: 'P6-L1' },
+  { id: 'rc-spi-linux', label: 'Write user-space spidev SPI drivers',          requiresLesson: 'P6-L2' },
+  { id: 'rc-mqtt',      label: 'Deploy MQTT clients with QoS 2 guarantees',    requiresLesson: 'P6-L3' },
+  { id: 'rc-systemd',   label: 'Configure read-only rootfs for crash recovery',requiresLesson: 'P6-L4' },
 ];
 
 /* ══════════════════════════════════════
@@ -88,7 +96,7 @@ function calculateReadinessScore(state) {
   const lessonScore = (passed / totalLessons) * 60;
 
   // Phase completions (20% of score)
-  const phaseScore = (phasesComplete / 5) * 20;
+  const phaseScore = (phasesComplete / 6) * 20;
 
   // Quality bonus: fewer assisted answers = higher quality (10%)
   const qualityScore = passed > 0

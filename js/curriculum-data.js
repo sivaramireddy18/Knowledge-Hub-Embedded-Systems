@@ -1363,7 +1363,182 @@ IWDG->KR  = 0xAAAA;  // Reload counter (pet the dog)
           analogyOnFail: "Updating your phone's OS while on a phone call, and if it crashes during boot, you need it to automatically reinstall the previous OS — not stay in a crash loop forever.",
           explanation: "A robust OTA bootloader must: 1) Verify new firmware CRC before booting it. 2) Track boot attempt count. 3) If the new firmware fails to boot N times (or doesn't mark itself 'valid'), fall back to the previous partition. Dual-bank flash keeps the old firmware intact until the new one proves itself operational."
         },
-        unlocks: null  // Phase 5 complete → GRADUATION
+        unlocks: "P6-L1"
+      }
+    ]
+  },
+
+  /* ════════════════════════════════════════════════════════
+     PHASE 6 — INDUSTRIAL IOT GATEWAY
+     Prerequisites: Phase 5 complete | Unlocks: Graduation
+     ════════════════════════════════════════════════════════ */
+  {
+    phaseId: 6,
+    phaseName: "Industrial IoT Gateway",
+    phaseSubtitle: "Yocto Linux, SPI sensor networks, MQTT, systemd daemons",
+    phaseIcon: "🏭",
+    totalLessons: 4,
+    lessons: [
+      {
+        id: "P6-L1",
+        title: "Introduction to Yocto — Building a Custom Linux OS",
+        content: `
+<p>In production industrial systems, we don't install Debian or Ubuntu. We build a custom, minimal, hardened Linux distribution from source using the <strong>Yocto Project</strong>.</p>
+<p>Yocto compiles the bootloader, kernel, device drivers, and applications specifically for your target hardware. This results in a tiny image (often < 20MB instead of gigabytes) that boots in seconds and has a dramatically reduced security attack surface.</p>
+<p>Key concepts in Yocto:</p>
+<ul>
+  <li><strong>Layers (meta-layers)</strong>: Repositories containing related configuration and recipes (e.g., <code>meta-raspberrypi</code>, <code>meta-openembedded</code>).</li>
+  <li><strong>Recipes (<code>.bb</code> files)</strong>: Instructions defining where to fetch code, compile options, dependencies, and where to install binaries in the image.</li>
+  <li><strong>BitBake</strong>: The build engine that parses recipes, resolves dependency graphs, downloads source packages, compiles them, and packages them into a flashable rootfs image.</li>
+</ul>
+<p>A typical recipe structure:</p>
+<pre>
+SUMMARY = "Simple C MQTT telemetry daemon"
+LICENSE = "MIT"
+LIC_FILES_CHKSUM = "file://\${COMMON_LICENSE_DIR}/MIT;md5=0835ade698e0bcf8506ecda2f7b4f302"
+
+SRC_URI = "git://github.com/antigravity/iot-daemon.git;protocol=https;branch=main"
+SRCREV = "a8f3b2d1c9e8f7a6b5c4d3e2f1a0b9c8d7e6f5a4"
+
+S = "\${WORKDIR}/git"
+
+inherit cmake
+</pre>`,
+        analogy: "Using Yocto is like baking a cake from raw ingredients (flour, eggs, sugar) using a custom recipe. Installing Ubuntu is like buying a pre-made frozen cake from the store — you get what they made, even if you only wanted a slice of vanilla.",
+        knowledgeCheck: {
+          type: "multiple-choice",
+          question: "What is the primary role of a recipe (.bb) file in a Yocto build system?",
+          options: [
+            "It is a script that executes on the target hardware to configure the runtime environment",
+            "It defines the source code location, build-time dependencies, compile steps, and installation layout for a package",
+            "It is a list of user accounts and passwords for target security",
+            "It manages the hardware registers of the MCU directly"
+          ],
+          correctIndex: 1,
+          hint1: "Think about build automation. What does a build tool need to know about a software package to compile and package it?",
+          hint2: "Recipes contain metadata like SRC_URI (source code URI), DEPENDS (other libraries), and task overrides (do_compile, do_install).",
+          analogyOnFail: "A kitchen recipe details: where to get the ingredients, what pre-requisites are needed, how to cook it, and how to plate it. A Yocto recipe does the exact same for code.",
+          explanation: "Yocto recipes (.bb files) provide BitBake with instructions on downloading source code, resolving compilation dependencies, running compile commands, and placing the output binaries in the target root filesystem layout."
+        },
+        unlocks: "P6-L2"
+      },
+      {
+        id: "P6-L2",
+        title: "Inter-Process SPI Sensor Protocol",
+        content: `
+<p>Our Industrial Gateway (running Linux on a Raspberry Pi 4 / ARM Cortex-A) must fetch sensor data from our real-time nodes (running bare-metal STM32 / ARM Cortex-M) in real-time.</p>
+<p>We use the **SPI (Serial Peripheral Interface)** bus. Unlike I2C, SPI is full-duplex (lines for MOSI and MISO) and can run at high frequencies (up to 50MHz+). It requires 4 wires: SCLK, MOSI, MISO, and CS (Chip Select).</p>
+<p>On the Linux user-space side, we communicate with the hardware SPI bus using the <code>spidev</code> character device driver:</p>
+<pre>
+#include &lt;stdint.h&gt;
+#include &lt;fcntl.h&gt;
+#include &lt;sys/ioctl.h&gt;
+#include &lt;linux/spi/spidev.h&gt;
+
+int spi_transfer(int fd, uint8_t *tx_buf, uint8_t *rx_buf, uint32_t len) {
+    struct spi_ioc_transfer tr = {
+        .tx_buf = (unsigned long)tx_buf,
+        .rx_buf = (unsigned long)rx_buf,
+        .len = len,
+        .speed_hz = 10000000, // 10 MHz
+        .delay_usecs = 0,
+        .bits_per_word = 8,
+    };
+    return ioctl(fd, SPI_IOC_MESSAGE(1), &amp;tr);
+}
+</pre>
+<p>To avoid race conditions, we design a simple packet protocol with packet headers, payloads (sensor readings), and a CRC16 checksum footer.</p>`,
+        analogy: "SPI is like a high-speed double-lane highway between two cities. Cars can drive in both directions simultaneously (Full Duplex) without waiting. The conductor (Master) controls the speed limits and flags which city is allowed to drive (Chip Select).",
+        knowledgeCheck: {
+          type: "numeric",
+          question: "How many physical wires are required to connect a master board to 3 independent SPI slave sensor chips using standard Chip Select lines?",
+          answer: 6,
+          tolerance: 0,
+          unit: "wires",
+          hint1: "SPI has 3 shared bus lines (SCLK, MOSI, MISO). In addition, how does the master select which slave is active?",
+          hint2: "Each slave requires its own dedicated Chip Select (CS) line from the master. Total wires = 3 shared lines + N dedicated CS lines.",
+          analogyOnFail: "A teacher talking to 3 students. All students share the air to listen (SCLK) and speak/listen (MOSI/MISO). But the teacher needs 3 dedicated pointer sticks (Chip Selects) to point at who should talk.",
+          explanation: "Standard multi-slave SPI connection requires 3 shared lines: SCLK, MOSI, and MISO. It also requires 1 dedicated CS line per slave. For 3 slaves: 3 shared + 3 dedicated CS = 6 wires total."
+        },
+        unlocks: "P6-L3"
+      },
+      {
+        id: "P6-L3",
+        title: "MQTT Telemetry Client in C/C++",
+        content: `
+<p>Now that our Linux gateway has read the sensor data via SPI, it must push this telemetry data to the cloud (or a local factory broker). The industry standard protocol for IoT telemetry is <strong>MQTT</strong> (Message Queuing Telemetry Transport).</p>
+<p>MQTT is a lightweight publish/subscribe messaging protocol designed for high-latency, low-bandwidth, or unreliable networks. It runs over TCP/IP.</p>
+<p>MQTT architecture relies on a **Broker** (e.g., Eclipse Mosquitto) that routing messages from publishers to subscribers based on **Topics** (e.g., <code>factory/node1/temperature</code>).</p>
+<p>MQTT Quality of Service (QoS) levels:</p>
+<ul>
+  <li><strong>QoS 0 (At most once)</strong>: Fire and forget. Messages can be lost.</li>
+  <li><strong>QoS 1 (At least once)</strong>: Guarantees delivery, but duplicates may occur.</li>
+  <li><strong>QoS 2 (Exactly once)</strong>: Guarantees delivery and no duplicates. Safest, but highest bandwidth overhead.</li>
+</ul>
+<pre>
+#include &lt;mosquitto.h&gt;
+
+void publish_telemetry(struct mosquitto *mosq, float temp) {
+    char payload[32];
+    snprintf(payload, sizeof(payload), "{\\"temp\\": %.2f}", temp);
+    
+    // Publish to topic with QoS 1
+    mosquitto_publish(mosq, NULL, "factory/node1/temp", 
+                      strlen(payload), payload, 1, false);
+}
+</pre>`,
+        analogy: "MQTT is like a community bulletin board (Broker). You pin notices to specific folders (Topics). People who check that folder (Subscribers) see your flyer. You don't need to know who reads it, and they don't need to knock on your door.",
+        knowledgeCheck: {
+          type: "multiple-choice",
+          question: "You are sending billing transactions or critical motor control alerts over MQTT where missing a message or receiving a duplicate is unacceptable. Which QoS level must you use?",
+          options: [
+            "QoS 0 — highest performance",
+            "QoS 1 — guarantees delivery",
+            "QoS 2 — guarantees exactly once delivery with duplicate prevention",
+            "QoS 3 — hardware level handshaking"
+          ],
+          correctIndex: 2,
+          hint1: "QoS 1 ensures it gets there, but if the ACK is lost, it might send again, causing duplicates. Only one level ensures exactly one delivery.",
+          hint2: "QoS 2 uses a 4-step handshake (Publish -> PubRec -> PubRel -> PubComp) to guarantee duplicate-free delivery.",
+          analogyOnFail: "Sending a registered letter where both receiver and sender sign off twice to verify delivery and cancel duplicates. That's QoS 2.",
+          explanation: "MQTT Quality of Service Level 2 (QoS 2) is the only level that guarantees a message is received exactly once by the subscriber, using a 4-part handshake to prevent duplicate processing."
+        },
+        unlocks: "P6-L4"
+      },
+      {
+        id: "P6-L4",
+        title: "Systemd Daemon & Power Failure Recovery",
+        content: `
+<p>An industrial gateway runs 24/7. Our C++ gateway daemon must start automatically on boot, recover if it crashes, and handle sudden power loss safely.</p>
+<p>To start automatically on Linux, we write a custom **Systemd Service** unit file (<code>/etc/systemd/system/gateway.service</code>):</p>
+<pre>
+[Unit]
+Description=Industrial IoT Telemetry Gateway Daemon
+After=network.target
+
+[Service]
+ExecStart=/usr/bin/gateway_daemon
+Restart=always
+RestartSec=5
+User=gateway
+Group=gateway
+
+[Install]
+WantedBy=multi-user.target
+</pre>
+<p><strong>Power Failure Protection</strong>: Industrial machinery is routinely powered off by flipping the main breaker. If Linux is writing to the SD card/eMMC when power is cut, the filesystem will corrupt, bricking the machine.</p>
+<p>We prevent this by configuring the root filesystem (rootfs) as **read-only** at the bootloader/kernel level. All runtime logs and temp directories are mapped to **RAM (tmpfs)**. If power is cut, no writes are active on the physical storage, ensuring zero corruption.</p>`,
+        analogy: "Systemd is a security guard standing watch. If a worker (daemon) passes out (crashes), the guard revives them (restarts) immediately. A read-only filesystem is like writing on a glass chalkboard — you can wipe it clean when the power goes out, but you never run the risk of breaking the board itself by scratching it.",
+        knowledgeCheck: {
+          type: "conceptual",
+          question: "Explain how systemd recovers our gateway application if it encounters a segmentation fault and crashes during execution, based on the service file configuration.",
+          requiredKeywords: ["restart", "always", "restartsec"],
+          hint1: "Look closely at the [Service] section of the gateway.service file definition. Which directives instruct systemd on how to handle process termination?",
+          hint2: "The directive `Restart=always` tells systemd to restart the service regardless of whether it exited cleanly or crashed. `RestartSec=5` defines the delay before restarting.",
+          analogyOnFail: "A supervisor who has the instruction: 'If the employee leaves for any reason, wait 5 seconds and hire them back immediately.'",
+          explanation: "The systemd service unit file contains `Restart=always`, which tells the systemd manager to automatically respawn the process if it terminates (including crashing with a segfault). The `RestartSec=5` configuration ensures a 5-second delay before restarting, preventing rapid crash loops from hogging resources."
+        },
+        unlocks: null  // Phase 6 complete → GRADUATION
       }
     ]
   }

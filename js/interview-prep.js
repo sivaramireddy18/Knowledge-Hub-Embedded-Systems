@@ -266,6 +266,42 @@ Sectors 8–11: Bank B — Pending update (128KB)</pre>
       'How does the bootloader "jump" to the application? What registers must be set before the jump?'
     ]
   },
+
+  /* ══════════════════════════════
+     PHASE 6 — INDUSTRIAL IOT
+     ══════════════════════════════ */
+  {
+    id: 'IQ-P6-1', phase: 6,
+    company: 'Intel / Siemens (Senior)', tier: 't1',
+    difficulty: 4,
+    question: 'Why is the Yocto Project preferred over standard Ubuntu Server or Alpine for industrial gateway systems? How does it impact security and boot times?',
+    framework: `<strong>Structure your response around customization, footprint, and lifecycle:</strong><br>
+1. <strong>Customization:</strong> Yocto compiles everything from source (cross-compiled) specifically for target architecture. No unnecessary packages, services, or drivers are loaded.<br>
+2. <strong>Footprint & Boot Time:</strong> A minimal Yocto image can be <20MB and boot in 2–4 seconds because it runs a tailored init sequence (systemd or busybox-init) instead of full Ubuntu system scans.<br>
+3. <strong>Security:</strong> Stripping out package managers (apt, apk), shells, and unused diagnostic services reduces the attack surface dramatically. Read-only root filesystem mounting is standard and trivially configured in Yocto.`,
+    commonMistakes: 'Saying Yocto is a "Linux distribution". It is a tool/metadata framework (a template builder) for *generating* custom distributions.',
+    followUps: [
+      'What is a recipe (.bb) and how does it relate to layers in Yocto?',
+      'How does BitBake cache downloads and build tasks to optimize incremental compilations?',
+      'Explain the difference between meta-layers and the Poky reference distribution.'
+    ]
+  },
+  {
+    id: 'IQ-P6-2', phase: 6,
+    company: 'ABB / Bosch (Senior)', tier: 't2',
+    difficulty: 4,
+    question: 'Describe the design of a SPI packet protocol between a real-time Cortex-M co-processor and an embedded Linux host. How do you handle framing and error detection?',
+    framework: `<strong>Design a robust packet architecture:</strong><br>
+1. <strong>Framing:</strong> Define a fixed Header byte (e.g., 0xA5) to establish synchronization, followed by Packet Length, Command Type, Payload, and Checksum.<br>
+2. <strong>Error Detection:</strong> Use CRC-16 (Cyclic Redundancy Check) over the entire header and payload to detect byte errors caused by high-frequency clock noise on the SPI bus.<br>
+3. <strong>Sync Recovery:</strong> If the receiver detects a mismatch in CRC or header sync, it flushes its RX buffer and ignores incoming SCLK edges until the master asserts Chip Select (CS) HIGH-to-LOW and sends the Sync word again.`,
+    commonMistakes: 'Using a simple XOR checksum for safety-critical industrial links. XOR check misses many double-bit errors that CRC-16 easily catches.',
+    followUps: [
+      'Why is full-duplex capability a key advantage of SPI over I2C in co-processor links?',
+      'How do you manage Linux user-space latency when capturing incoming SPI packet interrupts from the co-processor?',
+      'Describe the spidev driver configuration in the Linux Device Tree.'
+    ]
+  },
 ];
 
 /* ══════════════════════════════════════

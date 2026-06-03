@@ -18,6 +18,7 @@
   <nav id="dash-nav">
     <div class="dash-nav-logo">ANTIGRAVITY</div>
     <div class="dash-nav-right">
+      <a href="sandbox.html" class="btn btn-cyan btn-sm">💻 Sandbox</a>
       <a href="tutor.html" class="btn btn-ghost btn-sm">← Back to Tutor</a>
       <a href="index.html" class="btn btn-ghost btn-sm">⬡ Boot Screen</a>
     </div>
@@ -35,7 +36,7 @@
           <div class="dash-hero-stat-label">Lessons Passed</div>
         </div>
         <div class="dash-hero-stat">
-          <div class="dash-hero-stat-value" id="dash-stat-phases">0/5</div>
+          <div class="dash-hero-stat-value" id="dash-stat-phases">0/6</div>
           <div class="dash-hero-stat-label">Phases Complete</div>
         </div>
         <div class="dash-hero-stat">
@@ -430,7 +431,7 @@ function renderQuickStats(state) {
     { label: 'Total Attempts',    value: totalAttempts, color: 'var(--text-secondary)' },
     { label: 'Answer Accuracy',   value: `${accuracy}%`, color: accuracy > 70 ? 'var(--green)' : 'var(--amber)' },
     { label: 'Days Training',     value: days, color: 'var(--violet)' },
-    { label: 'Phases Unlocked',   value: `${state.unlockedPhases.length}/5`, color: 'var(--gold)' },
+    { label: 'Phases Unlocked',   value: `${state.unlockedPhases.length}/6`, color: 'var(--gold)' },
   ];
 
   el.innerHTML = stats.map(s => `
@@ -477,7 +478,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Stats
   document.getElementById('dash-stat-lessons').textContent = state.passedLessons.length;
-  document.getElementById('dash-stat-phases').textContent  = `${state.completedPhases.length}/5`;
+  document.getElementById('dash-stat-phases').textContent  = `${state.completedPhases.length}/6`;
   document.getElementById('dash-stat-streak').textContent  = streak;
   document.getElementById('dash-stat-readiness').textContent = `${score}%`;
 

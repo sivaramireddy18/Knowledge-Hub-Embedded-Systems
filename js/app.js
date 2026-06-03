@@ -10,11 +10,11 @@
 
 const BOOT_LINES = [
   { text: '▶  ANTIGRAVITY Curriculum Engine v2.0 — ARM Cortex-M4 Pedagogy Core', cls: 'info', delay: 200 },
-  { text: '[  OK  ] Loading curriculum graph ... 5 phases / 32 lesson nodes',       cls: 'ok',   delay: 500 },
+  { text: '[  OK  ] Loading curriculum graph ... 6 phases / 36 lesson nodes',       cls: 'ok',   delay: 500 },
   { text: '[  OK  ] Initializing knowledge-check grader (numeric, MC, keyword)',     cls: 'ok',   delay: 800 },
   { text: '[  OK  ] Mounting phase-gate state machine with localStorage persistence',cls: 'ok',   delay: 1100 },
   { text: '[  OK  ] Career Coach panel — salary bands, company targets loaded',      cls: 'ok',   delay: 1400 },
-  { text: '[  OK  ] Interview prep module — 12 MNC questions across 5 phases',       cls: 'ok',   delay: 1700 },
+  { text: '[  OK  ] Interview prep module — 16 MNC questions across 6 phases',       cls: 'ok',   delay: 1700 },
   { text: '[ WARN ] No student profile detected. Awaiting initiation command.',      cls: 'warn', delay: 2000 },
   { text: '━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━',   cls: 'dim',  delay: 2300 },
   { text: 'Type the command to begin.',                                               cls: '',     delay: 2500 },
@@ -462,7 +462,7 @@ function showGraduationCelebration() {
   if (!banner) return;
   document.getElementById('unlock-phase-emoji').textContent = '🎓';
   document.getElementById('unlock-phase-name').textContent  = 'Curriculum Complete';
-  document.getElementById('unlock-phase-sub').textContent   = 'All 5 phases passed. You earned it.';
+  document.getElementById('unlock-phase-sub').textContent   = 'All 6 phases passed. You earned it.';
   banner.classList.remove('hidden');
   spawnParticles(); spawnParticles();
   setTimeout(() => banner.classList.add('hidden'), 8000);

@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Antigravity Embedded Sandbox — Interactive code editor, hardware kit board simulator, register map, and real-time virtual oscilloscope.">
+  <title>Antigravity · Interactive Sandbox IDE</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/sandbox.css">
+</head>
+<body>
+
+<div id="sandbox-container">
+
+  <!-- ═══════════════════════════════════════
+       SANDBOX HEADER
+       ═══════════════════════════════════════ -->
+  <header id="sandbox-header">
+    <div style="display:flex; align-items:center; gap:16px;">
+      <a href="tutor.html" class="btn btn-ghost btn-sm" style="padding:4px 8px; border-radius:6px;">← Back</a>
+      <div class="sandbox-logo">ANTIGRAVITY SANDBOX</div>
+    </div>
+    
+    <div style="display:flex; align-items:center; gap:12px;">
+      <span style="font-family:var(--font-mono); font-size:11px; color:var(--text-muted);">EXAMPLE:</span>
+      <select id="select-example" class="btn btn-ghost btn-sm" style="background:#090f1d; border-color:var(--glass-border); color:var(--text-primary); cursor:pointer; outline:none; padding:5px 24px 5px 10px;">
+        <option value="blinky">Blinky LED (GPIO Output)</option>
+        <option value="button">Pushbutton Input (GPIO Input)</option>
+        <option value="pwm">PWM Signal Wave (Timer)</option>
+        <option value="freertos">FreeRTOS Tasks &amp; Queues</option>
+      </select>
+    </div>
+    
+    <div class="sandbox-actions">
+      <button class="btn btn-green btn-sm" id="btn-run">▶ RUN</button>
+      <button class="btn btn-ghost btn-sm" id="btn-stop" disabled>■ STOP</button>
+      <button class="btn btn-ghost btn-sm" id="btn-reset">↺ RESET</button>
+      <a href="dashboard.html" class="btn btn-gold btn-sm">📊 DASHBOARD</a>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════════════
+       LEFT COLUMN: EDITOR & LOGS
+       ═══════════════════════════════════════ -->
+  <section id="sandbox-left">
+    <div class="panel-header">
+      <span>main.c</span>
+      <span style="color:var(--cyan)">C-Compiler Emulator v1.0</span>
+    </div>
+    
+    <!-- Code Editor Widget -->
+    <div class="editor-container">
+      <div class="editor-gutter" id="editor-gutter">
+        <!-- Injected by JS -->
+      </div>
+      <div class="editor-highlight" id="editor-highlight"></div>
+      <textarea class="editor-textarea" id="editor-textarea" spellcheck="false" autocomplete="off" wrap="off"></textarea>
+    </div>
+    
+    <!-- Console logs -->
+    <div class="console-panel">
+      <div class="panel-header" style="border-top:none;">
+        <span>CONSOLE OUTPUT</span>
+        <span onclick="document.getElementById('console-output').innerHTML=''" style="cursor:pointer; color:var(--text-muted);" onmouseover="this.style.color='var(--red)'" onmouseout="this.style.color='var(--text-muted)'">CLEAR</span>
+      </div>
+      <div class="console-output" id="console-output">
+        <!-- Injected by JS -->
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════
+       RIGHT COLUMN: BOARD & REGISTERS
+       ═══════════════════════════════════════ -->
+  <section id="sandbox-right">
+  
+    <!-- Visual Board Card -->
+    <div class="sandbox-card">
+      <div class="sandbox-card-title">🔌 VIRTUAL HARDWARE DEV BOARD</div>
+      <div class="virtual-board">
+        
+        <!-- Pushbutton group -->
+        <div class="board-peripherals">
+          <div class="board-group">
+            <span class="board-label">PA0 (BTN)</span>
+            <div class="board-button" id="btn-pa0" 
+                 onmousedown="pressBoardButton(0, true)" 
+                 onmouseup="pressBoardButton(0, false)"
+                 onmouseleave="pressBoardButton(0, false)"
+                 ontouchstart="pressBoardButton(0, true)"
+                 ontouchend="pressBoardButton(0, false)"></div>
+          </div>
+        </div>
+
+        <!-- MCU Chip -->
+        <div class="board-chip">
+          <span>STM32F407</span>
+          <div class="board-chip-pin left" style="top:20px;"></div>
+          <div class="board-chip-pin left" style="top:40px;"></div>
+          <div class="board-chip-pin left" style="top:60px;"></div>
+          <div class="board-chip-pin left" style="top:80px;"></div>
+          
+          <div class="board-chip-pin right" style="top:20px;"></div>
+          <div class="board-chip-pin right" style="top:40px;"></div>
+          <div class="board-chip-pin right" style="top:60px;"></div>
+          <div class="board-chip-pin right" style="top:80px;"></div>
+          
+          <div class="board-chip-pin top" style="left:20px;"></div>
+          <div class="board-chip-pin top" style="left:40px;"></div>
+          <div class="board-chip-pin top" style="left:60px;"></div>
+          <div class="board-chip-pin top" style="left:80px;"></div>
+          
+          <div class="board-chip-pin bottom" style="left:20px;"></div>
+          <div class="board-chip-pin bottom" style="left:40px;"></div>
+          <div class="board-chip-pin bottom" style="left:60px;"></div>
+          <div class="board-chip-pin bottom" style="left:80px;"></div>
+        </div>
+
+        <!-- LED group -->
+        <div class="board-peripherals">
+          <div class="board-group">
+            <div class="board-led" id="led-pa5" onclick="toggleRegisterBit('GPIOA_ODR', 5)"></div>
+            <span class="board-label" style="text-align:left;">PA5 (LED)</span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- Oscilloscope Card -->
+    <div class="sandbox-card">
+      <div class="sandbox-card-title">📡 VIRTUAL MEMORY OSCILLOSCOPE</div>
+      <div class="oscilloscope-canvas-container">
+        <div class="oscilloscope-grid"></div>
+        <svg id="oscilloscope-svg" viewBox="0 0 450 140" preserveAspectRatio="none">
+          <path id="oscilloscope-path" class="scope-line" d="M 0,70 L 450,70" />
+        </svg>
+        <div class="scope-value-tag" id="scope-val-text">PA5 (LED): 0.0V [DC]</div>
+      </div>
+    </div>
+
+    <!-- Register Configuration Card -->
+    <div class="sandbox-card" style="margin-bottom: var(--space-xl);">
+      <div class="sandbox-card-title">📐 REGISTER MAP &amp; BIT CONFIGURATOR</div>
+      <div style="overflow-x:auto;">
+        <table class="register-table">
+          <thead>
+            <tr>
+              <th style="width:120px;">Register</th>
+              <th style="width:80px;">Address</th>
+              <th style="width:100px;">Hex Value</th>
+              <th>Bit Fields (Bit 31 ... Bit 0)</th>
+            </tr>
+          </thead>
+          <tbody id="register-tbody">
+            <!-- Injected by js/sandbox.js -->
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </section>
+
+</div>
+
+<script src="js/sandbox.js"></script>
+</body>
+</html>
