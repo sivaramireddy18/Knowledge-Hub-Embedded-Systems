@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Antigravity Embedded Tutor — Interactive 5-phase career curriculum from GPIO to FreeRTOS production firmware. Career coaching, MNC interview prep.">
+  <title>Antigravity Tutor · Session</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/tutor.css">
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════
+     SVG GRADIENT DEFS (for rings)
+     ═══════════════════════════════════════ -->
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <linearGradient id="ringGradCyan" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#00D4FF;"/>
+      <stop offset="100%" style="stop-color:#00E87A;"/>
+    </linearGradient>
+  </defs>
+</svg>
+
+<!-- ═══════════════════════════════════════
+     HARDWARE KIT SELECTION MODAL
+     ═══════════════════════════════════════ -->
+<div id="kit-modal" class="hidden">
+  <div class="kit-modal-inner">
+    <h2>Your Hardware Kit</h2>
+    <p>This shapes how Phase 1 lessons are framed. You can change your kit later.</p>
+    <div class="kit-grid">
+      <div class="kit-card" data-kit="arduino" onclick="selectKit('arduino')" id="kit-arduino">
+        <div class="kit-card-icon">🔌</div>
+        <div class="kit-card-name">Arduino Uno</div>
+        <div class="kit-card-sub">ATmega328P · 16MHz · AVR</div>
+      </div>
+      <div class="kit-card" data-kit="stm32" onclick="selectKit('stm32')" id="kit-stm32">
+        <div class="kit-card-icon">⚡</div>
+        <div class="kit-card-name">STM32F407</div>
+        <div class="kit-card-sub">ARM Cortex-M4 · 168MHz · FPU</div>
+      </div>
+      <div class="kit-card" data-kit="rpi" onclick="selectKit('rpi')" id="kit-rpi">
+        <div class="kit-card-icon">🍓</div>
+        <div class="kit-card-name">Raspberry Pi 4</div>
+        <div class="kit-card-sub">ARM Cortex-A72 · Linux · 4GB RAM</div>
+      </div>
+      <div class="kit-card" data-kit="none" onclick="selectKit('none')" id="kit-none">
+        <div class="kit-card-icon">📐</div>
+        <div class="kit-card-name">No Hardware Yet</div>
+        <div class="kit-card-sub">Simulation / Conceptual Mode</div>
+      </div>
+    </div>
+    <button class="btn btn-cyan" id="kit-confirm-btn" onclick="confirmKitSelection()" disabled style="width:100%;justify-content:center;margin-top:4px;">
+      Confirm Kit — Begin Training →
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     PHASE UNLOCK CELEBRATION
+     ═══════════════════════════════════════ -->
+<div id="phase-unlock-banner" class="hidden">
+  <div class="unlock-inner">
+    <div class="unlock-emoji" id="unlock-phase-emoji">⚙️</div>
+    <div class="unlock-label">Phase Unlocked</div>
+    <div class="unlock-title" id="unlock-phase-name">Removing the Training Wheels</div>
+    <div class="unlock-subtitle" id="unlock-phase-sub">Datasheets, bare-metal C, interrupts, timers, NVIC</div>
+    <button class="btn btn-cyan" onclick="document.getElementById('phase-unlock-banner').classList.add('hidden')" style="margin-top:32px;">
+      Begin Phase →
+    </button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════
+     MAIN 3-PANEL APP
+     ═══════════════════════════════════════ -->
+<div id="tutor-app" class="hidden">
+
+  <!-- ── Top Bar ── -->
+  <header id="top-bar">
+    <div class="top-bar-brand">
+      <div class="top-bar-logo">ANTIGRAVITY</div>
+      <div class="top-bar-sep"></div>
+      <div class="top-bar-subtitle">Embedded Systems Career Tutor</div>
+    </div>
+    <div class="top-bar-right">
+      <span id="student-name-display"></span>
+      <a href="dashboard.html" class="btn btn-gold btn-sm" id="btn-dashboard" title="Career Dashboard">
+        📊 Dashboard
+      </a>
+      <button class="btn btn-ghost btn-sm" onclick="openWeekPlan()" id="week-plan-btn">
+        📂 Week Plan
+      </button>
+      <button class="btn btn-ghost btn-sm" onclick="handleCommand({command:'interview'})" id="btn-interview">
+        🎯 Interview Q
+      </button>
+      <button class="btn btn-ghost btn-sm" onclick="if(confirm('Reset all progress? This cannot be undone.')){resetState();location.reload();}" id="reset-btn" title="Reset">
+        ↺
+      </button>
+    </div>
+  </header>
+
+  <!-- ════════════════════════════════════
+       LEFT SIDEBAR
+       ════════════════════════════════════ -->
+  <aside id="sidebar">
+
+    <!-- Student Card -->
+    <div class="student-card">
+      <div class="student-avatar" id="student-avatar">S</div>
+      <div class="student-name" id="sidebar-student-name">—</div>
+      <div class="student-kit-tag" id="student-kit-tag">🔧 —</div>
+      <div class="student-phase-badge" id="student-phase-badge">
+        <span>Phase 1</span>
+      </div>
+    </div>
+
+    <!-- Overall Progress -->
+    <div class="sidebar-progress">
+      <div class="sidebar-progress-row">
+        <span class="sidebar-progress-label">Overall Progress</span>
+        <span class="sidebar-progress-count" id="phase-progress-count">0 / 32</span>
+      </div>
+      <div class="progress-track">
+        <div class="progress-fill cyan" id="phase-progress-fill" style="width:0%"></div>
+      </div>
+    </div>
+
+    <!-- Phase Nav -->
+    <nav class="phase-nav">
+      <div class="phase-nav-section-label">Curriculum Phases</div>
+
+      <div class="phase-nav-item" id="phase-nav-1" onclick="clickPhaseNav(1)">
+        <div class="phase-nav-num">1</div>
+        <div class="phase-nav-info">
+          <div class="phase-nav-name">🌍 Ground Control</div>
+          <div class="phase-nav-sub" id="pnav-sub-1">0/8 lessons</div>
+        </div>
+        <span class="phase-lock-icon" id="pnav-lock-1"></span>
+      </div>
+
+      <div class="phase-nav-item locked" id="phase-nav-2" onclick="clickPhaseNav(2)">
+        <div class="phase-nav-num">2</div>
+        <div class="phase-nav-info">
+          <div class="phase-nav-name">⚙️ Remove Training Wheels</div>
+          <div class="phase-nav-sub" id="pnav-sub-2">0/8 lessons</div>
+        </div>
+        <span class="phase-lock-icon" id="pnav-lock-2">🔒</span>
+      </div>
+
+      <div class="phase-nav-item locked" id="phase-nav-3" onclick="clickPhaseNav(3)">
+        <div class="phase-nav-num">3</div>
+        <div class="phase-nav-info">
+          <div class="phase-nav-name">📡 Silicon Communication</div>
+          <div class="phase-nav-sub" id="pnav-sub-3">0/6 lessons</div>
+        </div>
+        <span class="phase-lock-icon" id="pnav-lock-3">🔒</span>
+      </div>
+
+      <div class="phase-nav-item locked" id="phase-nav-4" onclick="clickPhaseNav(4)">
+        <div class="phase-nav-num">4</div>
+        <div class="phase-nav-info">
+          <div class="phase-nav-name">🎼 Orchestration</div>
+          <div class="phase-nav-sub" id="pnav-sub-4">0/6 lessons</div>
+        </div>
+        <span class="phase-lock-icon" id="pnav-lock-4">🔒</span>
+      </div>
+
+      <div class="phase-nav-item locked" id="phase-nav-5" onclick="clickPhaseNav(5)">
+        <div class="phase-nav-num">5</div>
+        <div class="phase-nav-info">
+          <div class="phase-nav-name">🏗️ Pro Architecture</div>
+          <div class="phase-nav-sub" id="pnav-sub-5">0/4 lessons</div>
+        </div>
+        <span class="phase-lock-icon" id="pnav-lock-5">🔒</span>
+      </div>
+    </nav>
+
+    <!-- Sidebar Footer -->
+    <div class="sidebar-footer">
+      <button class="sidebar-footer-btn" onclick="handleCommand({command:'progress'})" id="btn-progress">
+        📊 My Progress
+      </button>
+      <button class="sidebar-footer-btn" onclick="handleCommand({command:'interview'})" id="btn-interview-side">
+        🎯 Interview Question
+      </button>
+      <button class="sidebar-footer-btn" onclick="handleCommand({command:'help'})" id="btn-help">
+        ❓ Commands
+      </button>
+      <a class="sidebar-footer-btn" href="index.html" id="btn-back-to-boot">
+        ← Boot Screen
+      </a>
+    </div>
+  </aside>
+
+  <!-- ════════════════════════════════════
+       CHAT AREA (CENTER)
+       ════════════════════════════════════ -->
+  <main id="chat-area">
+    <div id="messages-container" role="log" aria-live="polite" aria-label="Tutor conversation">
+      <div class="msg-system" id="welcome-divider">── Session Active ──</div>
+    </div>
+
+    <div id="chat-input-bar">
+      <div class="chat-input-container">
+        <textarea
+          id="chat-input" rows="1"
+          placeholder="Answer the knowledge check, ask a question, or type 'help'..."
+          aria-label="Chat input" autocomplete="off" spellcheck="false"
+        ></textarea>
+        <button id="chat-send-btn" aria-label="Send message">↑</button>
+      </div>
+      <div class="chat-input-hint">
+        Enter to send · Shift+Enter for new line · <code>help</code> for commands · <code>interview</code> for MNC practice questions
+      </div>
+    </div>
+  </main>
+
+  <!-- ════════════════════════════════════
+       CAREER COACH PANEL (RIGHT)
+       ════════════════════════════════════ -->
+  <aside id="career-panel">
+
+    <!-- Job Readiness Ring -->
+    <div class="readiness-ring-container">
+      <div class="readiness-ring-label">Job Readiness Score</div>
+      <div class="readiness-ring-wrap">
+        <svg id="readiness-ring-svg" width="120" height="120">
+          <defs>
+            <linearGradient id="readinessGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+              <stop offset="0%" style="stop-color:#00D4FF;"/>
+              <stop offset="100%" style="stop-color:#00E87A;"/>
+            </linearGradient>
+          </defs>
+          <circle class="ring-track" cx="60" cy="60" r="54"/>
+          <circle id="readiness-ring-fill" cx="60" cy="60" r="54"
+            fill="none" stroke-width="6" stroke-linecap="round"
+            stroke-dasharray="339" stroke-dashoffset="339"/>
+        </svg>
+        <div class="readiness-ring-center">
+          <div class="readiness-score-value" id="readiness-score-value">0</div>
+          <div class="readiness-score-pct">/ 100</div>
+        </div>
+      </div>
+      <div class="readiness-ring-sub" id="readiness-ring-sub">Complete Phase 1 to start building your profile.</div>
+    </div>
+
+    <!-- Salary Intelligence -->
+    <div class="career-panel-section">
+      <div class="section-label">Market Salary Range</div>
+      <div class="salary-banner">
+        <div class="salary-range" id="cp-salary-range">₹4L – ₹10L</div>
+        <div class="salary-label" id="cp-salary-level">Junior / Fresher</div>
+        <div class="salary-market" id="cp-salary-desc">C, GPIO, peripheral basics</div>
+      </div>
+    </div>
+
+    <!-- Target Employers -->
+    <div class="career-panel-section">
+      <div class="section-label" style="margin-bottom:10px;">Target Employers</div>
+      <div class="company-grid" id="cp-company-grid">
+        <!-- Injected by career-coach.js -->
+      </div>
+    </div>
+
+    <!-- Interview Readiness -->
+    <div class="career-panel-section">
+      <div class="section-label" style="margin-bottom:10px;">Interview Readiness</div>
+      <div class="readiness-checklist" id="cp-readiness-checklist">
+        <!-- Injected by career-coach.js -->
+      </div>
+    </div>
+
+    <!-- Daily Career Tip -->
+    <div class="career-panel-section">
+      <div class="daily-tip">
+        <div class="daily-tip-header">
+          <div class="daily-tip-icon">💡</div>
+          <div class="daily-tip-label">Career Insight</div>
+        </div>
+        <div class="daily-tip-text" id="cp-daily-tip-text"></div>
+        <div class="daily-tip-author" id="cp-daily-tip-author"></div>
+      </div>
+    </div>
+
+  </aside>
+
+</div><!-- /#tutor-app -->
+
+<!-- Scripts -->
+<script src="js/curriculum-data.js"></script>
+<script src="js/tutor-persona.js"></script>
+<script src="js/knowledge-check.js"></script>
+<script src="js/tutor-engine.js"></script>
+<script src="js/tutor-chat.js"></script>
+<script src="js/career-coach.js"></script>
+<script src="js/interview-prep.js"></script>
+<script src="js/app.js"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const fromBoot     = sessionStorage.getItem('ag_boot_ok');
+  const hasSavedData = !!localStorage.getItem('antigravity_tutor_state_v2');
+
+  if (fromBoot || hasSavedData) {
+    sessionStorage.removeItem('ag_boot_ok');
+    startTutorApp();
+  } else {
+    window.location.href = 'index.html';
+  }
+});
+
+window.startTutorApp = function() {
+  document.getElementById('tutor-app').classList.remove('hidden');
+  const hasSavedState = loadState();
+  if (hasSavedState && isInitialized()) {
+    updateSidebar();
+    renderCareerPanel();
+    resumeSession();
+  } else {
+    askForStudentName();
+  }
+  wireInputEvents();
+  autoResizeChatInput();
+};
+</script>
+
+</body>
+</html>

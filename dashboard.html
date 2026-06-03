@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Antigravity Embedded Tutor — Career Dashboard: Skill Radar, Phase Badges, Milestone Scorecard, Portfolio Tracker, Interview Readiness.">
+  <title>Antigravity · Career Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700;800;900&family=Space+Grotesk:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="styles/main.css">
+  <link rel="stylesheet" href="styles/dashboard.css">
+</head>
+<body>
+<div id="dashboard-page">
+
+  <!-- ── Top Nav ── -->
+  <nav id="dash-nav">
+    <div class="dash-nav-logo">ANTIGRAVITY</div>
+    <div class="dash-nav-right">
+      <a href="tutor.html" class="btn btn-ghost btn-sm">← Back to Tutor</a>
+      <a href="index.html" class="btn btn-ghost btn-sm">⬡ Boot Screen</a>
+    </div>
+  </nav>
+
+  <!-- ── Hero ── -->
+  <div class="dash-hero">
+    <div class="dash-hero-avatar" id="dash-avatar">S</div>
+    <div class="dash-hero-info">
+      <div class="dash-hero-name" id="dash-name">Loading...</div>
+      <div class="dash-hero-level" id="dash-level">Embedded Systems Engineer in Training</div>
+      <div class="dash-hero-stats">
+        <div class="dash-hero-stat">
+          <div class="dash-hero-stat-value" id="dash-stat-lessons">0</div>
+          <div class="dash-hero-stat-label">Lessons Passed</div>
+        </div>
+        <div class="dash-hero-stat">
+          <div class="dash-hero-stat-value" id="dash-stat-phases">0/5</div>
+          <div class="dash-hero-stat-label">Phases Complete</div>
+        </div>
+        <div class="dash-hero-stat">
+          <div class="dash-hero-stat-value" id="dash-stat-streak">0</div>
+          <div class="dash-hero-stat-label">Day Streak</div>
+        </div>
+        <div class="dash-hero-stat">
+          <div class="dash-hero-stat-value" id="dash-stat-readiness">0%</div>
+          <div class="dash-hero-stat-label">Job Readiness</div>
+        </div>
+      </div>
+    </div>
+    <!-- Overall Progress Ring -->
+    <div style="flex-shrink:0; text-align:center;">
+      <svg id="overall-ring" width="120" height="120" style="transform:rotate(-90deg);">
+        <defs>
+          <linearGradient id="overallGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+            <stop offset="0%" style="stop-color:#00D4FF;"/>
+            <stop offset="100%" style="stop-color:#00E87A;"/>
+          </linearGradient>
+        </defs>
+        <circle class="ring-track" cx="60" cy="60" r="50" stroke-width="8"/>
+        <circle id="overall-ring-fill" class="ring-fill" cx="60" cy="60" r="50"
+          stroke="url(#overallGrad)" stroke-width="8"
+          stroke-dasharray="314" stroke-dashoffset="314" stroke-linecap="round"/>
+      </svg>
+      <div style="font-family:var(--font-mono); font-size:10px; color:var(--text-muted); margin-top:6px; text-transform:uppercase; letter-spacing:0.1em;">Overall</div>
+    </div>
+  </div>
+
+  <!-- ── Main Grid ── -->
+  <div class="dash-grid">
+
+    <!-- PHASE BADGES (full width) -->
+    <div class="dash-card col-12 stagger-1">
+      <div class="dash-card-title">🏅 Phase Completion Badges</div>
+      <div class="dash-card-sub">Earned by passing all knowledge checks in each phase — no shortcuts.</div>
+      <div class="badge-grid" id="badge-grid">
+        <!-- Injected by JS -->
+      </div>
+    </div>
+
+    <!-- SKILL RADAR -->
+    <div class="dash-card col-5 stagger-2" style="min-height: 400px;">
+      <div class="dash-card-title">📡 Skill Radar</div>
+      <div class="dash-card-sub">8-axis competency map — updates as you progress</div>
+      <div id="skill-radar-container"></div>
+    </div>
+
+    <!-- JOB READINESS + SALARY -->
+    <div class="dash-card col-7 stagger-3">
+      <div class="dash-card-title">💼 Career Intelligence</div>
+      <div class="dash-card-sub">Market-calibrated benchmarks based on your current skill phase</div>
+
+      <!-- Salary band -->
+      <div class="salary-banner" id="dash-salary-banner" style="margin-bottom: 20px;">
+        <div class="salary-label">Current Market Salary Range</div>
+        <div class="salary-range" id="dash-salary-range">₹4L – ₹10L</div>
+        <div class="salary-market" id="dash-salary-level">Junior / Fresher · C, GPIO, basic peripheral knowledge</div>
+      </div>
+
+      <!-- Company targets grid -->
+      <div class="section-label">Target Employers</div>
+      <div class="company-grid" id="dash-company-grid" style="margin-bottom: 20px;"></div>
+
+      <!-- Readiness checklist (condensed) -->
+      <div class="section-label">Interview Readiness Checklist</div>
+      <div class="readiness-checklist" id="dash-readiness-checklist"></div>
+    </div>
+
+    <!-- MILESTONE SCORECARD -->
+    <div class="dash-card col-8 stagger-4">
+      <div class="dash-card-title">🏆 Milestone Scorecard</div>
+      <div class="dash-card-sub">Phase-gate challenges — pass one per phase to unlock the next</div>
+      <table class="milestone-table" id="milestone-table">
+        <thead>
+          <tr>
+            <th>Phase</th>
+            <th>Challenge</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="milestone-tbody">
+          <!-- Injected by JS -->
+        </tbody>
+      </table>
+    </div>
+
+    <!-- STUDY STREAK + STATS -->
+    <div class="dash-card col-4 stagger-5" style="display:flex; flex-direction:column; gap:24px;">
+      <div>
+        <div class="dash-card-title">🔥 Study Streak</div>
+        <div class="dash-card-sub">Consecutive days active</div>
+        <div class="streak-container">
+          <div class="streak-emoji">🔥</div>
+          <div class="streak-value" id="dash-streak-val">0</div>
+          <div class="streak-label">Days</div>
+        </div>
+      </div>
+      <div class="divider"></div>
+      <div>
+        <div class="section-label">Quick Stats</div>
+        <div style="display:flex; flex-direction:column; gap:10px; margin-top:12px;" id="dash-quick-stats">
+          <!-- Injected by JS -->
+        </div>
+      </div>
+    </div>
+
+    <!-- PORTFOLIO TRACKER -->
+    <div class="dash-card col-6">
+      <div class="dash-card-title">🚀 Portfolio Tracker</div>
+      <div class="dash-card-sub">GitHub projects to build — each one is a signal in your job application</div>
+      <div class="portfolio-list" id="portfolio-list">
+        <!-- Injected by JS -->
+      </div>
+    </div>
+
+    <!-- INTERVIEW PREP -->
+    <div class="dash-card col-6">
+      <div class="dash-card-title">🎯 Interview Prep</div>
+      <div class="dash-card-sub">Phase-unlocked questions from real embedded systems interviews</div>
+      <div id="dash-interview-section">
+        <!-- Injected by JS -->
+      </div>
+    </div>
+
+  </div><!-- /.dash-grid -->
+</div><!-- /#dashboard-page -->
+
+<!-- Scripts -->
+<script src="js/curriculum-data.js"></script>
+<script src="js/tutor-persona.js"></script>
+<script src="js/knowledge-check.js"></script>
+<script src="js/tutor-engine.js"></script>
+<script src="js/career-coach.js"></script>
+<script src="js/interview-prep.js"></script>
+
+<script>
+/* ═══════════════════════════════════════════════════════
+   DASHBOARD INITIALIZATION
+   ═══════════════════════════════════════════════════════ */
+
+const MILESTONES = [
+  {
+    phase: 1, emoji: '⚙️',
+    title: 'Custom Dynamic Memory Allocator + Logic Gate Simulator',
+    desc: 'Pure C. No stdlib malloc. Manage a 4096-byte static pool with a linked-list of free/allocated blocks. Build a 4-bit Binary Full Adder from software logic gates. Zero memory leaks.'
+  },
+  {
+    phase: 2, emoji: '🔌',
+    title: 'Bare-Metal MPU6050 I2C Driver on STM32F4',
+    desc: 'Zero HAL. Configure RCC, GPIO (open-drain), I2C1 registers (CR1, CR2, CCR, TRISE). Every polling loop must have a timeout guard. Logic analyzer proof required.'
+  },
+  {
+    phase: 3, emoji: '📡',
+    title: 'Multi-Threaded IPC Network Packet Processor on Linux',
+    desc: 'POSIX shared memory, named semaphores, thread pool with mutex + condition variables, file I/O with flock. Zero race conditions allowed. Valgrind clean.'
+  },
+  {
+    phase: 4, emoji: '🎼',
+    title: 'FreeRTOS Smart Battery Monitor & Data Logger',
+    desc: 'ADC via DMA, 3 tasks with correct priority design, Message Queue, Mutex with priority inheritance, stack overflow hooks, vTaskNotifyGiveFromISR from TIM ISR.'
+  },
+  {
+    phase: 5, emoji: '🐧',
+    title: 'Linux Out-of-Tree Kernel Character Device Driver',
+    desc: 'Device Tree Overlay, alloc_chrdev_region, file operations, ioremap, request_threaded_irq with tasklet bottom-half. Tested on Raspberry Pi 4.'
+  },
+  {
+    phase: 6, emoji: '🏭',
+    title: 'Industrial IoT Gateway — Yocto-Based Capstone',
+    desc: 'Custom Yocto layer (meta-industrial-gateway), STM32F4 sensor nodes over SPI/UART, multi-threaded C++ app as systemd service, MQTT telemetry, Valgrind clean, boot < 8 seconds.'
+  }
+];
+
+const PORTFOLIO_PROJECTS = [
+  { id: 'pf-1', title: 'Custom malloc/free', desc: 'Static memory pool with linked-list free-block management. Zero-dependency. valgrind-clean.', phase: 1, tags: ['C', 'Memory', 'Phase 1'] },
+  { id: 'pf-2', title: 'GPIO Bare-Metal Blinky', desc: 'LED + button from scratch — direct register access. No STM32 CubeMX, no HAL.', phase: 2, tags: ['C', 'STM32', 'Registers'] },
+  { id: 'pf-3', title: 'UART Driver (Polling + Interrupt)', desc: 'Bare-metal UART with ring buffer. Interrupt-driven RX, polling TX. No HAL_UART_Transmit.', phase: 2, tags: ['C', 'UART', 'ISR'] },
+  { id: 'pf-4', title: 'I2C MPU6050 Driver', desc: 'Full I2C register config + MPU6050 accelerometer/gyro read. Logic analyzer traces included.', phase: 2, tags: ['I2C', 'Driver', 'Sensor'] },
+  { id: 'pf-5', title: 'SPI Flash Driver (W25Q64)', desc: 'Read/write/erase over SPI. DMA-based transfer. CRC verification. Performance benchmarked.', phase: 3, tags: ['SPI', 'DMA', 'Flash'] },
+  { id: 'pf-6', title: 'FreeRTOS Battery Monitor', desc: 'Milestone 4 project. 3 tasks, queue, mutex, DMA ADC, stack profiling. Full README + oscilloscope captures.', phase: 4, tags: ['RTOS', 'FreeRTOS', 'STM32'] },
+  { id: 'pf-7', title: 'Dual-Bank OTA Bootloader', desc: 'STM32 bootloader with CRC32, Bank A/B swap, rollback on 3 consecutive failures, UART firmware load.', phase: 5, tags: ['Bootloader', 'OTA', 'C'] },
+  { id: 'pf-8', title: 'Linux Kernel Character Driver', desc: 'Milestone 5. Device tree overlay, IRQ handler, ioremap, copy_to/from_user. Tested on RPi4.', phase: 5, tags: ['Linux', 'Kernel', 'Driver'] },
+];
+
+const SKILL_AXES = [
+  { label: 'C Mastery',         key: 'c',         phaseWeight: [0.2, 0.35, 0.2, 0.15, 0.1] },
+  { label: 'ARM Architecture',  key: 'arm',        phaseWeight: [0.1, 0.4,  0.2, 0.2,  0.1] },
+  { label: 'Peripheral Drivers',key: 'drivers',    phaseWeight: [0.05, 0.5, 0.25, 0.15, 0.05] },
+  { label: 'RTOS',              key: 'rtos',       phaseWeight: [0, 0.1, 0.1, 0.6, 0.2] },
+  { label: 'Protocols',         key: 'protocols',  phaseWeight: [0, 0.15, 0.7, 0.1, 0.05] },
+  { label: 'Linux / Kernel',    key: 'linux',      phaseWeight: [0, 0, 0.3, 0.2, 0.5] },
+  { label: 'Debugging',         key: 'debug',      phaseWeight: [0.1, 0.25, 0.25, 0.25, 0.15] },
+  { label: 'System Design',     key: 'sysdesign',  phaseWeight: [0.05, 0.1, 0.15, 0.2, 0.5] },
+];
+
+/* ── Compute skill scores from state ── */
+function computeSkillScores(state) {
+  const completedPhases = state.completedPhases || [];
+  const lessonPct = state.passedLessons.length / getTotalLessons();
+
+  return SKILL_AXES.map(axis => {
+    let score = 0;
+    for (let i = 0; i < 5; i++) {
+      if (completedPhases.includes(i + 1)) {
+        score += axis.phaseWeight[i] * 1.0;
+      } else if ((state.currentPhase - 1) === i) {
+        score += axis.phaseWeight[i] * lessonPct * 0.7;
+      }
+    }
+    return Math.min(1, score);
+  });
+}
+
+/* ── Radar Chart ── */
+function drawRadarChart(scores) {
+  const el = document.getElementById('skill-radar-container');
+  if (!el) return;
+
+  const W = 280, H = 280, CX = 140, CY = 140, R = 100;
+  const n = SKILL_AXES.length;
+  const levels = [0.25, 0.5, 0.75, 1.0];
+
+  function polarToXY(angle, radius) {
+    return {
+      x: CX + radius * Math.cos(angle - Math.PI / 2),
+      y: CY + radius * Math.sin(angle - Math.PI / 2)
+    };
+  }
+
+  let gridHTML = '';
+  levels.forEach(level => {
+    const pts = Array.from({length: n}, (_, i) => {
+      const p = polarToXY((2 * Math.PI * i) / n, R * level);
+      return `${p.x},${p.y}`;
+    }).join(' ');
+    gridHTML += `<polygon points="${pts}" class="radar-grid-line"/>`;
+  });
+
+  let axisHTML = '';
+  SKILL_AXES.forEach((_, i) => {
+    const p = polarToXY((2 * Math.PI * i) / n, R);
+    axisHTML += `<line x1="${CX}" y1="${CY}" x2="${p.x}" y2="${p.y}" class="radar-axis-line"/>`;
+  });
+
+  let labelHTML = '';
+  SKILL_AXES.forEach((axis, i) => {
+    const p  = polarToXY((2 * Math.PI * i) / n, R + 24);
+    const anchor = p.x < CX - 5 ? 'end' : p.x > CX + 5 ? 'start' : 'middle';
+    labelHTML += `<text x="${p.x}" y="${p.y}" class="radar-axis-label" text-anchor="${anchor}" dominant-baseline="middle">${axis.label}</text>`;
+  });
+
+  const dataPoints = scores.map((score, i) => {
+    const p = polarToXY((2 * Math.PI * i) / n, R * score);
+    return `${p.x},${p.y}`;
+  }).join(' ');
+
+  const dotHTML = scores.map((score, i) => {
+    const p = polarToXY((2 * Math.PI * i) / n, R * score);
+    return `<circle cx="${p.x}" cy="${p.y}" r="4" class="radar-dot"/>`;
+  }).join('');
+
+  el.innerHTML = `
+    <svg id="skill-radar-svg" width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+      <defs>
+        <linearGradient id="radarGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+          <stop offset="0%" style="stop-color:#00D4FF; stop-opacity:0.3"/>
+          <stop offset="100%" style="stop-color:#7B61FF; stop-opacity:0.1"/>
+        </linearGradient>
+      </defs>
+      ${gridHTML}
+      ${axisHTML}
+      ${labelHTML}
+      <polygon points="${dataPoints}" fill="url(#radarGrad)" stroke="#00D4FF" stroke-width="1.5" stroke-linejoin="round"/>
+      ${dotHTML}
+    </svg>
+  `;
+}
+
+/* ── Badge Grid ── */
+function renderBadgeGrid(state) {
+  const grid = document.getElementById('badge-grid');
+  if (!grid) return;
+
+  const phaseData = [
+    { num: 1, name: 'Ground Control',    sub: 'C + Electricity + GPIO',    emoji: '🌍', color: 'var(--cyan)' },
+    { num: 2, name: 'Remove Training Wheels', sub: 'Bare-Metal ARM',      emoji: '⚙️', color: 'var(--amber)' },
+    { num: 3, name: 'Silicon Comms',     sub: 'I2C, SPI, UART, CAN',      emoji: '📡', color: 'var(--green)' },
+    { num: 4, name: 'Orchestration',     sub: 'FreeRTOS + DMA',           emoji: '🎼', color: 'var(--violet)' },
+    { num: 5, name: 'Pro Architecture',  sub: 'HAL + Bootloader + Linux',  emoji: '🏗️', color: 'var(--gold)' },
+    { num: 6, name: 'Capstone',          sub: 'Industrial IoT Gateway',    emoji: '🏭', color: 'var(--rose)' },
+  ];
+
+  grid.innerHTML = phaseData.map(p => {
+    const earned = state.completedPhases.includes(p.num);
+    return `
+      <div class="phase-badge-card ${earned ? 'earned' : ''}">
+        ${earned ? '<div class="badge-earned-tag">EARNED</div>' : ''}
+        <div class="badge-icon">${p.emoji}</div>
+        <div class="badge-title">${p.name}</div>
+        <div class="badge-subtitle">${p.sub}</div>
+      </div>`;
+  }).join('');
+}
+
+/* ── Milestone Table ── */
+function renderMilestoneTable(state) {
+  const tbody = document.getElementById('milestone-tbody');
+  if (!tbody) return;
+
+  tbody.innerHTML = MILESTONES.map(m => {
+    const completed = state.completedPhases.includes(m.phase);
+    const unlocked  = state.unlockedPhases.includes(m.phase) && !completed;
+    const statusHTML = completed
+      ? `<span class="milestone-status ms-complete">✓ Complete</span>`
+      : unlocked
+        ? `<span class="milestone-status ms-unlocked">⚡ In Progress</span>`
+        : `<span class="milestone-status ms-locked">🔒 Locked</span>`;
+
+    return `
+      <tr class="milestone-row">
+        <td><div class="ms-phase">Phase ${m.phase}</div><div style="font-size:24px; margin-top:4px;">${m.emoji}</div></td>
+        <td><div class="ms-title">${m.title}</div><div class="ms-desc">${m.desc}</div></td>
+        <td style="white-space:nowrap; padding-top:16px;">${statusHTML}</td>
+      </tr>`;
+  }).join('');
+}
+
+/* ── Portfolio Tracker ── */
+function renderPortfolio(state) {
+  const list = document.getElementById('portfolio-list');
+  if (!list) return;
+
+  list.innerHTML = PORTFOLIO_PROJECTS.map(proj => {
+    const done = state.unlockedPhases.includes(proj.phase);
+    const tags = proj.tags.map(t => `<span class="tag">${t}</span>`).join('');
+    return `
+      <div class="portfolio-item ${done ? 'done' : ''}">
+        <div class="portfolio-check">${done ? '✓' : ''}</div>
+        <div class="portfolio-item-content">
+          <div class="portfolio-item-title">${proj.title}</div>
+          <div class="portfolio-item-desc">${proj.desc}</div>
+          <div class="portfolio-item-tags">${tags}</div>
+        </div>
+      </div>`;
+  }).join('');
+}
+
+/* ── Interview Panel on Dashboard ── */
+function renderDashboardInterviewSection(state) {
+  const el = document.getElementById('dash-interview-section');
+  if (!el) return;
+
+  const phase = state.currentPhase || 1;
+  const available = getInterviewQuestionsForPhase(phase);
+  const sample = available.slice(0, 2);
+
+  if (!sample.length) {
+    el.innerHTML = `<div style="color:var(--text-muted); font-family:var(--font-mono); font-size:12px;">No questions available yet. Complete Phase 1 to unlock interview questions.</div>`;
+    return;
+  }
+
+  el.innerHTML = `
+    <div style="margin-bottom:14px;">
+      <span class="badge badge-violet">${available.length} Questions Available</span>
+      <span style="font-family:var(--font-mono); font-size:11px; color:var(--text-muted); margin-left:10px;">Phase 1–${phase} unlocked</span>
+    </div>
+    ${sample.map(q => buildInterviewQuestionCard(q)).join('')}
+    <div style="margin-top:14px; text-align:center;">
+      <a href="tutor.html" class="btn btn-violet btn-sm">Open Full Interview Prep →</a>
+    </div>`;
+}
+
+/* ── Quick Stats ── */
+function renderQuickStats(state) {
+  const el = document.getElementById('dash-quick-stats');
+  if (!el) return;
+
+  const totalAttempts = Object.values(state.kcAttempts || {}).reduce((a,b) => a+b, 0);
+  const accuracy = state.passedLessons.length > 0
+    ? Math.round(((state.passedLessons.length) / Math.max(totalAttempts,1)) * 100)
+    : 0;
+  const assisted = (state.assistedLessons || []).length;
+  const days = state.startedAt
+    ? Math.max(1, Math.ceil((Date.now() - new Date(state.startedAt).getTime()) / 86400000))
+    : 1;
+
+  const stats = [
+    { label: 'Lessons Passed',    value: state.passedLessons.length, color: 'var(--cyan)' },
+    { label: 'Lessons Assisted',  value: assisted, color: 'var(--amber)', hint: 'Review these' },
+    { label: 'Total Attempts',    value: totalAttempts, color: 'var(--text-secondary)' },
+    { label: 'Answer Accuracy',   value: `${accuracy}%`, color: accuracy > 70 ? 'var(--green)' : 'var(--amber)' },
+    { label: 'Days Training',     value: days, color: 'var(--violet)' },
+    { label: 'Phases Unlocked',   value: `${state.unlockedPhases.length}/5`, color: 'var(--gold)' },
+  ];
+
+  el.innerHTML = stats.map(s => `
+    <div style="display:flex; justify-content:space-between; align-items:center; padding:8px 0; border-bottom:1px solid var(--glass-border);">
+      <span style="font-family:var(--font-mono); font-size:11px; color:var(--text-muted);">${s.label}</span>
+      <span style="font-family:var(--font-heading); font-size:16px; font-weight:700; color:${s.color};">${s.value}</span>
+    </div>`).join('');
+}
+
+/* ── Study Streak ── */
+function computeStreak(state) {
+  if (!state.lastActiveAt && !state.startedAt) return 0;
+  const last = new Date(state.lastActiveAt || state.startedAt);
+  const now  = new Date();
+  const diff = Math.floor((now - last) / 86400000);
+  if (diff > 1) return 0; // Streak broken
+  if (!state.startedAt) return 1;
+  return Math.max(1, Math.ceil((now - new Date(state.startedAt)) / 86400000));
+}
+
+/* ══════════════════════════════════════
+   MAIN INIT
+   ══════════════════════════════════════ */
+document.addEventListener('DOMContentLoaded', () => {
+  const hasSavedState = loadState();
+  if (!hasSavedState) {
+    window.location.href = 'index.html';
+    return;
+  }
+
+  const state = getState();
+  const score = calculateReadinessScore(state);
+  const salary = SALARY_BANDS[state.currentPhase] || SALARY_BANDS[1];
+  const streak = computeStreak(state);
+
+  // Hero
+  const nameEl = document.getElementById('dash-name');
+  const avatarEl = document.getElementById('dash-avatar');
+  if (nameEl) nameEl.textContent = state.studentName || 'Student';
+  if (avatarEl) avatarEl.textContent = (state.studentName || 'S')[0].toUpperCase();
+
+  const levelEl = document.getElementById('dash-level');
+  if (levelEl) levelEl.textContent = `${salary.level} · ${salary.desc}`;
+
+  // Stats
+  document.getElementById('dash-stat-lessons').textContent = state.passedLessons.length;
+  document.getElementById('dash-stat-phases').textContent  = `${state.completedPhases.length}/5`;
+  document.getElementById('dash-stat-streak').textContent  = streak;
+  document.getElementById('dash-stat-readiness').textContent = `${score}%`;
+
+  // Overall ring
+  const ring = document.getElementById('overall-ring-fill');
+  if (ring) {
+    const total = getTotalLessons();
+    const pct   = state.passedLessons.length / total;
+    const circumference = 2 * Math.PI * 50;
+    setTimeout(() => {
+      ring.style.strokeDashoffset = circumference - (pct * circumference);
+    }, 300);
+  }
+
+  // Salary
+  const salaryRangeEl = document.getElementById('dash-salary-range');
+  const salaryLevelEl = document.getElementById('dash-salary-level');
+  if (salaryRangeEl) salaryRangeEl.textContent = salary.inr;
+  if (salaryLevelEl) salaryLevelEl.textContent  = `${salary.level} · ${salary.desc}`;
+
+  // Streak display
+  document.getElementById('dash-streak-val').textContent = streak;
+
+  // Render all sections
+  renderBadgeGrid(state);
+  renderMilestoneTable(state);
+  renderPortfolio(state);
+  renderQuickStats(state);
+  renderDashboardInterviewSection(state);
+
+  // Company grid
+  const companyGrid = document.getElementById('dash-company-grid');
+  if (companyGrid) {
+    const maxPhase = Math.max(...state.unlockedPhases, 1);
+    companyGrid.innerHTML = COMPANY_TARGETS.map(c => {
+      const unlocked = maxPhase >= c.requiresPhase;
+      return `<div class="company-card ${unlocked ? 'unlocked' : ''}" data-tooltip="${c.role}">
+        <div class="company-name">${c.name}</div>
+        <div class="company-role">${c.role}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // Checklist
+  const checklistEl = document.getElementById('dash-readiness-checklist');
+  if (checklistEl) {
+    const passed = state.passedLessons || [];
+    checklistEl.innerHTML = READINESS_CHECKLIST.slice(0, 6).map(item => {
+      const done = passed.includes(item.requiresLesson);
+      return `<div class="readiness-item ${done ? 'done' : ''}">
+        <div class="ri-check">${done ? '✓' : ''}</div>
+        <span>${item.label}</span>
+      </div>`;
+    }).join('');
+  }
+
+  // Skill radar
+  const skillScores = computeSkillScores(state);
+  drawRadarChart(skillScores);
+});
+</script>
+</body>
+</html>
