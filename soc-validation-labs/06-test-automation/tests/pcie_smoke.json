@@ -1,0 +1,20 @@
+{
+  "suite": "pcie-smoke",
+  "tests": [
+    {
+      "test_id": "PCIE-SYSFS-001",
+      "description": "PCIe sysfs is available",
+      "expected": "available"
+    },
+    {
+      "test_id": "PCIE-ENUM-001",
+      "description": "Target BDF is enumerated",
+      "expected": "target-specific"
+    },
+    {
+      "test_id": "PCIE-LINK-001",
+      "description": "Negotiated link speed/width match target expectation",
+      "expected": "target-specific"
+    }
+  ]
+}
