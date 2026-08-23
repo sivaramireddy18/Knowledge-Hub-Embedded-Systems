@@ -24,6 +24,25 @@ Negative testing
 Pass / Fail report
 ```
 
+## Included implementation
+
+- `register_validation.py` — hardware-agnostic register comparison helper
+- `test_register_validation.py` — automated unit tests
+
+Run the helper:
+
+```bash
+python3 register_validation.py
+```
+
+Run tests:
+
+```bash
+python3 -m unittest -v
+```
+
+The sample intentionally contains both a passing and failing register case so the output demonstrates the validation workflow.
+
 ## Validation checklist
 
 - [ ] Base address is correct
@@ -34,8 +53,9 @@ Pass / Fail report
 - [ ] Reserved bits remain unchanged
 - [ ] Status bits change only under expected hardware conditions
 - [ ] Register access does not cause unexpected side effects
+- [ ] Automated comparison reports mismatches clearly
 
-## Evidence to collect
+## Evidence to collect on hardware
 
 - Register address
 - Expected value
@@ -45,6 +65,10 @@ Pass / Fail report
 - Timestamp / boot state
 - Pass/fail result
 - Debug notes
+
+## Important limitation
+
+The included Python implementation does **not** access real hardware. It provides the validation/test framework that can later consume register values from a board, debugger, log or platform-specific test interface.
 
 ## Debug questions
 
