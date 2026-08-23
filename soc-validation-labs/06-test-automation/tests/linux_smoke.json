@@ -1,0 +1,20 @@
+{
+  "suite": "linux-host-smoke",
+  "tests": [
+    {
+      "test_id": "HOST-001",
+      "command": "uname -s",
+      "expected_contains": "Linux"
+    },
+    {
+      "test_id": "HOST-002",
+      "command": "test -d /sys && echo SYSFS_OK",
+      "expected_contains": "SYSFS_OK"
+    },
+    {
+      "test_id": "HOST-003",
+      "command": "test -d /sys/bus/pci/devices && echo PCI_SYSFS_OK",
+      "expected_contains": "PCI_SYSFS_OK"
+    }
+  ]
+}
