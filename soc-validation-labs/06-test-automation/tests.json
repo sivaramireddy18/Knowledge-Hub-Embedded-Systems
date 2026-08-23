@@ -1,0 +1,15 @@
+{
+  "suite": "register-smoke",
+  "tests": [
+    {
+      "test_id": "REG-RESET-001",
+      "expected": "0x00000001",
+      "observed": "0x00000001"
+    },
+    {
+      "test_id": "REG-STATUS-001",
+      "expected": "0x00000080",
+      "observed": "0x00000000"
+    }
+  ]
+}
