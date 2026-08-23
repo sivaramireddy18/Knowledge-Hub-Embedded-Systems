@@ -1,0 +1,40 @@
+name: Validation Framework CI
+
+on:
+  push:
+    paths:
+      - 'soc-validation-labs/06-test-automation/**'
+      - '.github/workflows/validation-ci.yml'
+  pull_request:
+    paths:
+      - 'soc-validation-labs/06-test-automation/**'
+      - '.github/workflows/validation-ci.yml'
+
+jobs:
+  python-validation:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: soc-validation-labs/06-test-automation
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Compile Python sources
+        run: python -m compileall -q .
+
+      - name: Run sample validation suite
+        run: python test_runner.py tests.json --output results.json
+        continue-on-error: true
+
+      - name: Generate regression report
+        run: python regression_report.py results.json --output REGRESSION.md
+
+      - name: Validate generated report
+        run: test -s REGRESSION.md
